@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------------------------------------------------
--- LibConsole-1.0.lua - rev1 (TODO DATE)
+-- LibConsole-1.0.lua - rev1 (1 may 2014)
 -- Hendrick "Leosky" Francois - kheless [AT] gmail [DOT] com
--- TODO
+-- A lib to handle command building through table with validations (patterns, enum, magic word etc) 
 -- inspired by AceConsole-3.0
 -----------------------------------------------------------------------------------------------------------------------
 require "Apollo"
@@ -9,8 +9,7 @@ require "Apollo"
 local LibConsole = {
   _NAME = "LibConsole",
   _VERSION = {MAJOR = 'LibConsole-1.0', MINOR = 1},
-  _URL     = 'TODO',
-  _DESCRIPTION = 'TODO',
+  _DESCRIPTION = 'A lib to handle command building through table with validations (patterns, enum, magic word etc) ',
   _LICENSE = [[
 The MIT License (MIT)
 
@@ -40,6 +39,7 @@ THE SOFTWARE.
 
 LibConsole.RegisteredShashCommand = {}
 LibConsole.CommandHandler = {}
+
 function LibConsole:OnLoad()
 
 end
