@@ -272,8 +272,6 @@ local mixins = {
     "validate"
 } 
 
--- Embeds AceConsole into the target object making the functions from the mixins list available on target:..
--- @param target target object to embed AceBucket in
 function LibConsole:Embed( target )
     for k, v in pairs( mixins ) do
         target[v] = self[v]
