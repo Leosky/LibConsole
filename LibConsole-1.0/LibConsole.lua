@@ -40,6 +40,17 @@ THE SOFTWARE.
 LibConsole.RegisteredShashCommand = {}
 LibConsole.CommandHandler = {}
 
+LibConsole.enumTypeValidator = {
+	rangeValidator = "rangeValidator", simpleValidator = "simpleValidator", enumValidator = "enumValidator", patternValidator = "patternValidator"
+}
+
+LibConsole.enumSimpleValidators = {
+	number = "Number", --integer or floating
+	integer = "integer",
+	floating = "floating",
+	string = "String", --text surounded with quotes "", internal " have to be escaped (/")
+}
+
 function LibConsole:OnLoad()
 
 end
@@ -56,33 +67,11 @@ end
 
 function LibConsole:RegisterSlashCommand( strName, tParams, tLuaEventHandler )
     LibConsole.RegisteredShashCommand[strName] = tParams
-    LibConsole.CommandHandler[strName] = tLuaEventHandler
-    print(inspect(LibConsole.RegisteredShashCommand))
-	for k, v in pairs(tParams) do
-		if k == "strDescription" then
-
-		elseif k == "func" then
-		elseif k == "strFunc" then
-		elseif k == "bNoHelp" then
-
-		elseif k == "rangeValidator" then
-		elseif k == "enumValidator" then
-		elseif k == "simpleValidator" then
-		elseif k == "patternValidator" then
-		elseif k == "tValidators" then
-		elseif k == "strParam" then
-		elseif k == "nArgsExpected" then
-		
-		elseif k == "fOnInvalid" then
-		elseif k == "tParams" then
-			--nested param
-		end
-
-		
-	end
+    LibConsole.CommandHandler[strName] = tLuaEventHandlerf
 end
 
 function LibConsole:OnRegisteredCommand(strCommand, strParams)
+	print ("[/" .. strCommand .. strParams .. "]")
 	local tParams = {}
 
     for param in string.gmatch(strParams, "[^%s]+") do
@@ -91,31 +80,40 @@ function LibConsole:OnRegisteredCommand(strCommand, strParams)
 
     local tTemp = LibConsole.RegisteredShashCommand[strCommand]
     local tHandler = LibConsole.CommandHandler[strCommand]
-    for k, v in pairs(tParams) do --iterating furnished parameters
-        for i,j in pairs(tTemp) do --iterating registered parameters
-            local nArgsExpected = j.nArgsExpected or 1  --TODO Change for to handle 0 nedded args
-            if #tParams - nArgsExpected < k then -- only func args are present so a func should be present
-                --extracting them from tParams to build de args array for func
-                local args = {}
-                for idx = k, #tParams do
-                        table.insert(args, tParams[k])
-                end
-                tTemp.func(tHandler, v)
-                break
-            elseif j.strParam == v then
-                --there is more parameters neded so 
-                if j.tParams then
-                    tTemp = j.tParams
-                else
-                    tTemp = j
-                end
-                break
-            end
-            
-        end
+    if #tParams == 0 then --simple command without parameters
+    	for k, v in pairs(tTemp) do
+    		if not v.strParam then
+    			v.func(tHandler)
+    			break
+    		end
+    	end
+   	else
+	    for k, v in pairs(tParams) do --iterating furnished parameter
+	        for i,j in pairs(tTemp) do --iterating registered parameters
+	            local nArgsExpected = (j.tValidators and #j.tValidators) or 0
+	            Print(i..":"..inspect(j))
+	            if nArgsExpected >= #tParams - k and not j.strParams == v then -- only func args are present so a func should be present
+	                --extracting them from tParams to build de args array for func
+	                local args = {}
+	                for idx = k, #tParams do
+	                        table.insert(args, tParams[k])
+	                end
+	                tTemp.func(tHandler, args)
+	                return
+	            elseif j.strParam == v then
+	                --there is more parameters neded so 
+	                if j.tParams then
+	                    tTemp = j.tParams
+	                else
+	                    tTemp = j
+	                end
+	                break
+	            end
+	            
+	        end
 
+	    end
     end
-    
 end
 
 function LibConsole:new(o)
