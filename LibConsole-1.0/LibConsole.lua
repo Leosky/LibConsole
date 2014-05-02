@@ -67,7 +67,7 @@ function LibConsole.validate(tValidator, arg)
         elseif eSimpleType == LibConsole.enumSimpleValidators.char then
             if type(arg) == "string" and #arg == 1 then return true end
         else
-            error("SimpleValidator type isn't recognized (".. tValidator.eSimpleType ..').')
+            ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"SimpleValidator type isn't recognized (".. tValidator.eSimpleType ..').')
         end
     elseif eType == LibConsole.enumTypeValidators.range then
         local assertion = assert(tValidator.tParams and #tValidator.tParams ==2, "LibConsole error : Range  validator isn't well formated. Expected {min, max}.")
@@ -91,7 +91,7 @@ function LibConsole.validate(tValidator, arg)
 
         return string.match (arg, tValidator.tParams)
     else
-        error("Validator type isnt recognized (".. tValidator.strType ..').')
+        ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"Validator type isnt recognized (".. tValidator.strType ..').')
     end
 
     return false
@@ -114,9 +114,9 @@ function LibConsole.appendHelp(tTable, strBuffer)
     for k, v in pairs(tTable) do
         if not (v.tParams or v.bNoHelp) then
             if  v.tValidators then
-                Print(strCloneBuffer.. (v.strParam and " " .. v.strParam or "") .. LibConsole.appendValidators(v.tValidators) .. (v.strDescription and " - " .. v.strDescription or ""))
+                ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,strCloneBuffer.. (v.strParam and " " .. v.strParam or "") .. LibConsole.appendValidators(v.tValidators) .. (v.strDescription and " - " .. v.strDescription or ""))
             else
-                Print(strCloneBuffer.. (v.strParam and " " .. v.strParam or "") .. (v.strDescription and " - " .. v.strDescription or ""))
+                ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,strCloneBuffer.. (v.strParam and " " .. v.strParam or "") .. (v.strDescription and " - " .. v.strDescription or ""))
             end
             
         elseif v.tParams then 
@@ -166,7 +166,7 @@ function LibConsole.appendValidator(tValidator)
 
         return "[pattern(".. tValidator.tParams .. ")]"
     else
-        error("Validator type isnt recognized (".. tValidator.strType ..').')
+        ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"Validator type isnt recognized (".. tValidator.strType ..').')
     end
 
     return "[arg]"
@@ -201,9 +201,10 @@ function LibConsole.OnRegisteredCommand(strCommand, strParams)
             if not (v.tParams or v.bNoHelp) then
 
                 if v.tValidators then
-                    Print("/".. strCommand .. (v.strParam and " " .. v.strParam or "") .. LibConsole.appendValidators(v.tValidators) .. (v.strDescription and " - " .. v.strDescription or ""))
+                    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"/".. strCommand .. (v.strParam and " " .. v.strParam or "") .. LibConsole.appendValidators(v.tValidators) .. (v.strDescription and " - " .. v.strDescription or ""))
+                    Print()
                 else
-                    Print("/".. strCommand .. (v.strParam and " " .. v.strParam or "") .. (v.strDescription and " - " .. v.strDescription or ""))
+                    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"/".. strCommand .. (v.strParam and " " .. v.strParam or "") .. (v.strDescription and " - " .. v.strDescription or ""))
                 end 
             elseif v.tParams then 
                 LibConsole.appendHelp(v.tParams, "/"..strCommand .. " " .. v.strParam)
@@ -242,26 +243,32 @@ function LibConsole.OnRegisteredCommand(strCommand, strParams)
             end
             ::final_param_found::
             
-            local nArgsExpected = (tTemp.tValidators and #tTemp.tValidators) or 0
+            if tTemp.func then
+                local nArgsExpected = (tTemp.tValidators and #tTemp.tValidators) or 0
 
-            if #tParams - nLastParamUsedIdx >= nArgsExpected  or tTemp.bArgValidation == false then
-                local args = {}
-                    for idx = nLastParamUsedIdx+1, #tParams do
-                        table.insert(args, tParams[idx])
-                    end
-
-                    local valid
-                    for i=1,#tTemp.tValidators do
-                        valid = LibConsole.validate(tTemp.tValidators[i], args[i])
-                        if not valid then
-                            ChatSystemLib.PostOnChannel( ChatSystemLib.ChatChannel_Command,"Invalid parameter (".. args[i] ..")")
-                            if tTemp.funcInvalid then tTemp.funcInvalid(tHandler, args) end
-                            return
+                if #tParams - nLastParamUsedIdx >= nArgsExpected  or tTemp.bArgValidation == false then
+                    local args = {}
+                        for idx = nLastParamUsedIdx+1, #tParams do
+                            table.insert(args, tParams[idx])
                         end
-                    end
-                    tTemp.func(tHandler, args)
+
+                        local valid
+                        if tTemp.tValidators then
+                            for i=1,#tTemp.tValidators do
+                                valid = LibConsole.validate(tTemp.tValidators[i], args[i])
+                                if not valid then
+                                    ChatSystemLib.PostOnChannel( ChatSystemLib.ChatChannel_Command,"Invalid parameter (".. args[i] ..")")
+                                    if tTemp.funcInvalid then tTemp.funcInvalid(tHandler, args) end
+                                    return
+                                end
+                            end
+                        end
+                        tTemp.func(tHandler, args)
+                else
+                    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"Invalid number of parameters (".. nArgsExpected .." value(s) expected)")
+                end
             else
-                ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"Invalid number of parameters (".. nArgsExpected .." value(s) expected)")
+                ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Command,"Invalid command parameter.")
             end
         end
     end
