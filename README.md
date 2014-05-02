@@ -1,3 +1,5 @@
+A lib to handle commands building through tables with automatic validations and help generation (patterns, enum, magic word etc).
+
 Quick start
 ===========
 Simply build your command definition and then send it to LibConsole with :
