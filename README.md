@@ -62,8 +62,8 @@ Here is a self explaining exemple covering the most classical aspects :
         }
       }
     }
-
-LibConsole.RegisterSlashCommands(slashCommand,self)
+    LibConsole.RegisterSlashCommands(slashCommand,self)
+        
 
 now if you type cmd '/ssi help', the implicit function is called based on your strParam, strDescription and tValidators and will show this output for the current exemple : 
 
@@ -79,3 +79,7 @@ If you type a valid instruction the function `func` will be called or will raise
     [Command] Invalid parameter (KABOUM)
     
 If you dont want to use the base validators, you can skip tValidators. Then, every args will be accepted for a given command + params, but you are still able to call yourself `LibConsole.validate`. For exemple if your command support a variable number of args.
+
+Bugs
+====
+Actualy there is only few use case so test havent been very exhausive. And pattern validator havn't been tested at all. So expect error but if you still use it, dont esitate to contact me for help / debug.
